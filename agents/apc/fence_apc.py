@@ -250,11 +250,21 @@ will block any necessary fencing actions."
 	## and continue with proper action
 	####
 	result = -1
-	firmware_version = re.compile(r'\s*v(\d)*\.').search(conn.before)
-	if (firmware_version != None) and (firmware_version.group(1) in [ "5", "6", "7" ]):
-		result = fence_action(conn, options, set_power_status5, get_power_status5, get_power_status5)
+	version_5 = False
+
+	firmware_version = re.compile(r'\s*v(\d)\.?(\d)*\.').search(conn.before)
+
+	if (firmware_version != None):
+			if (firmware_version.group(1) in [ "1" ]):
+					if (firmware_version.group(2) in [ "5", "6", "7" ]):
+							version_5 = True
+			elif (firmware_version.group(1) in [ "5", "6", "7" ]):
+					version_5 = True
+
+	if version_5:
+			result = fence_action(conn, options, set_power_status5, get_power_status5, get_power_status5)
 	else:
-		result = fence_action(conn, options, set_power_status, get_power_status, get_power_status)
+			result = fence_action(conn, options, set_power_status, get_power_status, get_power_status)
 
 	fence_logout(conn, "4")
 	sys.exit(result)
